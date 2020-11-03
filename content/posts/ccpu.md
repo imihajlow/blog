@@ -56,7 +56,7 @@ The module layout actually helped: I have to redo the control module. The first 
 
 # Registers module
 
-![registers](/registers.jpg)
+![registers](/registers.svg)
 
 This simplified diagram shows the register layout inside the processor. Control, clock, and reset signals are not shown.
 
