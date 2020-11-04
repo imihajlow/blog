@@ -166,7 +166,12 @@ Examples:
 
 # Instruction execution
 
-The control board takes `IR`, clock, and flags as an input and outputs all the control signals for other boards. On this board instruction execution is encoded with discrete logic.
+On the control board instruction execution is encoded with discrete logic. Using the value of the instruction register (`IR`), clock, and flags, the control signals for the registers, ALU, and memory are calculated. Such signals include (but are not limited to):
+ * load `IR`,
+ * increment `IP`,
+ * write or read memory,
+ * write any register,
+ * enable a register or ALU output to drive a bus.
 
 Most of the instructions are executed in two clock cycles. The `LDI` (load immediate) instruction requires four cycles: `IP` should be incremented twice.
 
@@ -175,7 +180,7 @@ Using three flip-flops three additional slower clock signals are generated from 
 ![Clocks](/clocks.png)
 
  * `cycle` controls the execution cycle of the instruction. When `cycle` is low, `IR` is loaded, when `cycle` is high, the instruction is executed.
- * `we_cycle` is basically `cycle` phase-shifted by 90&deg;. It's used to generate the `n_we_mem` signal for the [`ST` instruction](#store-register-to-ram-st).
+ * `we_cycle` is basically `cycle` phase-shifted by 90&deg;. It's used to generate the `n_we_mem` (write memory) signal for the [`ST` instruction](#store-register-to-ram-st).
  * `supercycle` is only active when the long [`LDI` instruction](#load-immediate-value-ldi) is executed.
 
 The general rules of the control signals:
@@ -203,9 +208,9 @@ These rules assure that values on the buses (ALU output, memory output) are stab
 
 This instruction is similar to `LD`, but the write signals are formed on the data bus. During the second phase `n_mem_oe` is set to high which makes RAM chip release the data bus. To write the byte, `n_mem_we` is pulled down for the first half of the second phase. The data is written into RAM when this signal goes up. This happens on falling clock edge when the data is stable.
 
-## ALU instructions
+## Arithmetic instructions
 
-There are two types of ALU instructions: direct and inversed. In the direct case the operation result is written into `A`, in the inversed case the ALU inputs are flipped and the result is written into the source register. For example, `SUB A, B` is a direct instruction and `SUB PL, A` is inversed. In the second case `PL` will be modified.
+There are two types of instructions involving ALU: direct and inversed. In the direct case the operation result is written into `A`, in the inversed case the ALU inputs are flipped and the result is written into the other register (not A). For example, `SUB A, B` is a direct instruction and `SUB PL, A` is inversed. In the second case `PL` will be modified.
 
 ![Direct ALU waveforms](/waveforms/alu0.png)
 
