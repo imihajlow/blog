@@ -33,7 +33,7 @@ There are four flags implemented:
   * Z - zero;
   * C - carry;
   * S - sign;
-  * O - overflow.
+  * O - overflow (for signed arithmetics).
 
 # Hardware design
 
@@ -78,7 +78,7 @@ Finally, the flags output from the ALU is stored into a register. Its output is 
 
 The ALU provides 16 arithmetic operations. I've decided to implement the ALU using a ROM-based lookup table. The straightforward approach would be to use one large ROM chip, feed everything to it and read the result from the output:
 
-![Wannabe ALU](/wannabe-alu.jpg)
+![Wannabe ALU](/wannabe-alu.svg)
 
 The following inputs are needed:
  * Operands A and B (16 bits in total);
@@ -94,7 +94,7 @@ In total, the ROM should have 22 bit input and 12 bit output. The output, of cou
 
 Considering all of this, I decided to process two 4-bit nibbles separately:
 
-![ALU](/alu.jpg)
+![ALU](/alu.svg)
 
 This way operations like addition, subtraction, bit shifts can't be done without communication between the nibbles. I added one feedback line going from lower nibble's output to the high nibble's input (shown in green) and the other way around (red). To prevent feedback oscillations, logic gates were added: only one feedback line is activated at a time selected by bit 3 of the opcode. This means operations like addition or left shift (when an information bit should go "up") can be encoded by opcodes from 0 to 7, and operations like right shift should occupy opcodes from 8 to 15.
 
@@ -238,7 +238,7 @@ Given all the limitations of the processor, programming it in assembly is a pret
 
 ## Functions
 
-When a jump is performed, `IP` an `P` are swapped. This way jumps can also be viewed as function calls: the return address will be stored in `P` on function entry. We just need to store it in a variable.
+When a jump is performed, `IP` an `P` are swapped. This way jumps can also be viewed as function calls: the return address will be stored in `P` on function entry. We just need to save it in a variable.
 
 ```
 function:
@@ -318,3 +318,7 @@ Internal temporary variables (also static) are introduced to store intermediate 
 These limitations with functions lead to another limitation: a function call result can only be assigned to a variable. You cannot use a function in an expression. Otherwise, each function would have to use its own set of temp variables. 
 
 The other difference with C is the lack of static casts. In C narrow types are implicitly cast to `int`, then the operation result is cast back if assigned to a variable of a different type. In Natrix there are no implicit casts. Calculations are performed in the explicitly specified type. This helps to reduce unnecessary overhead and make it clear for the programmer which type is currenly used.
+
+# Project repository
+
+If you are interested, you can find the project repository [here on GitHub](https://github.com/imihajlow/ccpu/).
