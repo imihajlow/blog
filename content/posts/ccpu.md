@@ -4,7 +4,7 @@ date: 2020-10-11T18:53:35+02:00
 draft: true
 ---
 
-Since I was a kid I've always wanted to build my own computer. First I had only vague ideas of how computers are made, then I got myself a book about building an 8080-based computer and programming it, then, of course, I've got a lot of experience with various computers and microcontrollers, but I've never built one from scratch. Now, when I'm 30, I can say I have fulfilled my childhood dream.
+Since I was a kid I've always wanted to build my own computer. First I had only vague ideas of how computers are made, then I got myself a book about building an 8080-based computer and programming it, later, of course, I've got a lot of experience with various computers and microcontrollers, but I've never built one from scratch. Now, when I'm 30, I can say I have fulfilled my childhood dream.
 
 The main part of the project is the CPU. My CPU has 8-bit data bus width and have the address bus width of 16 bits. The CPU is attached to the peripheral module which contains program ROM, RAM, display, and keyboard.
 
@@ -23,13 +23,11 @@ I wanted to make the processor as simple as possible, but not too constrained. A
 
 To access memory and perform jumps you have to somehow supply memory addresses. Most of the modern processors allow user to encode direct or indirect memory address right in the load/store/jump instruction. Doing this on discrete logic would be too complicated or would require microcode. Therefore, I decided to only have indirect memory access and jumps using a pointer register. To load the registers in the first place, a **load immediate** instruction is necessary.
 
-These four classes of instructions are the only instructions implemented.
+These four classes of instructions (read/write memory, arithmetics, jumps, load immediate) are the only instructions implemented.
 
-The processor operates on 8-bit data and can address up to 65536 bytes of memory (16 bit address). This means, the pointer register should hold 16 bits. From the programmer's point of view, the pointer register is split into two halves: `PL` and `PH`. These halves can be loaded separately. Then, the whole `P` register is used to access memory. Jumps are performed by swapping the `P` register with the instruction pointer. As a side effect, function calls can be implemented: after swapping (and jumping), `P` shall contain the return address.
+The processor operates on 8-bit data and can address up to 65536 bytes of memory (16 bit address). This means the pointer register should hold 16 bits. From the programmer's point of view, the pointer register `P` is split into two halves: `PL` and `PH`. These halves can be loaded separately. Then, the whole `P` register is used to access memory. Jumps are performed by swapping the `P` register with the instruction pointer. As a side effect, function calls can be implemented: after swapping (and jumping), `P` shall contain the return address.
 
-The other two registers are named `A` and `B`. The arithmetics is performed between `A` and another register.
-
-There are four flags implemented:
+The other two registers are named `A` and `B`. The arithmetics is performed between `A` and another register. There are four flags implemented:
   * Z - zero;
   * C - carry;
   * S - sign;
@@ -64,7 +62,7 @@ Registers `A` and `B` have one input and two tri-state outputs. Each output can 
 
 `P` is a combined register. It consists of two pairs (16 bit each) of preloadable counters. The `sel` input selects which pair is considered to be the instruction pointer (`IP`) (and can be incremented) and which one is the pointer register `P`. The `cnt` signal controls if the current `IP` is incremented on the clock edge. If `addr_dp` is asserted, the address bus is driven from the `P` pair, otherwise `IP` is used. `we_dh`, `we_dl`, `oe_dh`, `oe_dl` signals control whether the halves of the `P` pair are loaded or drive output bus.
 
-As you can see, one of the ALU inputs is always connected to the register `A`. The other input can be driven by any of the registers (this bus is shown in purple). If none of the `oe` signals is asserted, the second ALU input would be zero because of the pull-down resistors. This way arithmetics between `A` and zero can be performed.
+As you can see on the diagram, one of the ALU inputs is always connected to the register `A`. The other input can be driven by any of the registers (this bus is shown in purple). If none of the `oe` signals is asserted, the second ALU input would be zero because of the pull-down resistors. This way arithmetics between `A` and zero can be performed.
 
 Each register's input is connected to the internal data bus (green). This bus can be driven either by ALU or by a tri-state buffer connecting it to the external data bus (red). This allows the registers to be loaded either from memory or from the arithmetic operation result.
 
@@ -96,7 +94,7 @@ Considering all of this, I decided to process two 4-bit nibbles separately:
 
 ![ALU](/alu.svg)
 
-This way operations like addition, subtraction, bit shifts can't be done without communication between the nibbles. I added one feedback line going from lower nibble's output to the high nibble's input (shown in green) and the other way around (red). To prevent feedback oscillations, logic gates were added: only one feedback line is activated at a time selected by bit 3 of the opcode. This means operations like addition or left shift (when an information bit should go "up") can be encoded by opcodes from 0 to 7, and operations like right shift should occupy opcodes from 8 to 15.
+This way operations like addition, subtraction, bit shifts can't be done without communication between the nibbles. I added one feedback line going from lower nibble's output to the high nibble's input (shown in green) and the other way around (red). To prevent feedback oscillations, logic gates were added: only one feedback line is activated at a time and selected by bit 3 of the opcode. This means operations like addition or left shift (when an information bit should go "up") can be encoded by opcodes from 0 to 7, and operations like right shift should occupy opcodes from 8 to 15.
 
 The overflow flag (for signed arithmetics) is taken from the upper nibble table: only higher bits influence this flag.
 
