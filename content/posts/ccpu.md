@@ -8,11 +8,17 @@ Since I was a kid I've always wanted to build my own computer. First I had only 
 
 The main part of the project is the CPU. My CPU has 8-bit data bus width and have the address bus width of 16 bits. The CPU is attached to the peripheral module which contains program ROM, RAM, display, and keyboard.
 
-# Operation demo
+# Applications
+
+These are the two applications I made for the computer.
 
 _Video: calculator_
 
+The soft floating point calculator can perform four arithmetic operations. The numbers are coded by 16 bytes (14 bytes for 14 decimal digits of mantissa, 1 byte for the exponent and 1 sign byte). You can see how slow it divides two numbers.
+
 _Video: maze_
+
+In the maze game you have a 1d view on a 2d maze and must find a key and then a door to the next, bigger, level. You look at one row of the maze at the time, but you can rotate your view.
 
 # Overview
 
@@ -112,25 +118,44 @@ For convenience, processor needs a `MOV` instruction to copy one register's valu
 
 All instructions except for `LDI` are encoded in one byte. `LDI` is coded in two bytes: the second byte is the immediate value.
 
+In the control unit the following circuit decodes the instruction opcode stored in the instruction register:
+
+![Instruction decoding](/instr-decode.png)
+
+Signals `ir7`, `ir6` and `ir5` are the three upper bits of the `IR`. When bit 7 is low, `op_alu` is high indicating an ALU instruction. If bit 7 is high, the decoder `U2B` is enabled and the other two bits are used to select one of the four remaining instructions.
+
 ## ALU instructions
+
+One operand for this instruction is always A, the other one is encoded in the last two bits:
 
 ```
 0ooooidd
  \__/|\/
-   | | -- register operand (00 - 0, 01 - B, 10 - PL, 11 - PH)
+   | | -- other register operand (00 - zero, 01 - B, 10 - PL, 11 - PH)
    | +--- inversion bit (0 - "SUB A, B", 1 - "SUB B, A")
    +----- ALU operation
 ```
 
 Example: `SUB PL, A` would be `00001110` (`SUB` opcode is `0001`).
 
-## LD and ST instructions
+## LD instruction
 
 ```
-10s???rr
-  |   \/
-  |    -- register operand (00 - A, 01 - B, 10 - PL, 11 - PH)
-  +------ 0 - LD, 1 - ST
+100???rr
+      \/
+       -- register operand (00 - A, 01 - B, 10 - PL, 11 - PH)
+```
+
+Example: `LD
+
+## ST instruction
+
+Only `A` or `B` can be stored into memory. Storing `PL` or `PH` doesn't make sense anyway: they contain the address of the memory location.
+
+```
+101????r
+       |
+       -- register operand (0 - A, 1 - B)
 ```
 
 Example: `ST B` would be `10100001`.
@@ -142,7 +167,7 @@ Example: `ST B` would be `10100001`.
       \/ \______/
        \     +---- immediate value
        |
-       +---------- register operand, same as for LD and ST
+       +---------- register operand, same as for LD
 ```
 
 Example: `LDI PL, 0xF0` would be `11000010 11110000`.
@@ -231,7 +256,7 @@ The peripheral board provides 32k ROM, 28k RAM and minimum IO: a keyboard and a 
  * `0xF002` - LCD module control (write only)
  * `0xF003` - LCD module data (write only)
 
-A matrix keyboard interface is implemented using a register to store the column mask and a 3-state buffer to drive the data bus with the row mask.
+A matrix keyboard interface is implemented using an 8-bit register to store the column mask and a 3-state 8-bit buffer to drive the data bus with the row mask. Keyboards up to 8x8 are possible, but I could only find and buy a 4x4 matrix keyboard.
 
 A common 16x2 LCD module is used as a display. Its 8 bit interface bus perfectly matches CPU buses with minimal extra logic.
 
@@ -321,6 +346,8 @@ Internal temporary variables (also static) are introduced to store intermediate 
 These limitations with functions lead to another limitation: a function call result can only be assigned to a variable. You cannot use a function in an expression. Otherwise, each function would have to use its own set of temp variables. 
 
 The other difference with C is the lack of static casts. In C narrow types are implicitly cast to `int`, then the operation result is cast back if assigned to a variable of a different type. In Natrix there are no implicit casts. Calculations are performed in the explicitly specified type. This helps to reduce unnecessary overhead and make it clear for the programmer which type is currenly used.
+
+The maze game is written in Natrix.
 
 # Project repository
 
