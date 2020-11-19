@@ -8,18 +8,6 @@ Since I was a kid I've always wanted to build my own computer. First I had only 
 
 The main part of the project is the CPU. My CPU has 8-bit data bus width and have the address bus width of 16 bits. The CPU is attached to the peripheral module which contains program ROM, RAM, display, and keyboard.
 
-# Applications
-
-These are the two applications I made for the computer.
-
-_Video: calculator_
-
-The soft floating point calculator can perform four arithmetic operations. The numbers are coded by 16 bytes (14 bytes for 14 decimal digits of mantissa, 1 byte for the exponent and 1 sign byte). You can see how slow it divides two numbers.
-
-_Video: maze_
-
-In the maze game you have a 1d view on a 2d maze and must find a key and then a door to the next, bigger, level. You look at one row of the maze at the time, but you can rotate your view.
-
 # Overview
 
 I wanted to make the processor as simple as possible, but not too constrained. A processor needs to do these few things:
@@ -146,7 +134,7 @@ Example: `SUB PL, A` would be `00001110` (`SUB` opcode is `0001`).
        -- register operand (00 - A, 01 - B, 10 - PL, 11 - PH)
 ```
 
-Example: `LD
+Example: `LD PH` would be `10000011`.
 
 ## ST instruction
 
@@ -335,7 +323,7 @@ Then I tried to make my own LLVM backend, but I found myself overwhelmed by the 
 
 ## Natrix
 
-Finally, I decided to make my own compiler from scratch. I used the [Lark](https://github.com/lark-parser/lark) parsing toolkit for Python and implemented a C-like language which I called Natrix after a snake. 
+Finally, I decided to make my own compiler from scratch. I used the [Lark](https://github.com/lark-parser/lark) parsing toolkit for Python and implemented a C-like language which I called Natrix after a snake.
 
 Basically, Natrix came out to be almost a subset of C. What makes it different is the lack of stack allocations. All local variables are static (the names are mangled so that there's no name collision between functions). Function parameters and return values are transferred in static variables too.
 
@@ -343,11 +331,22 @@ Inside one translation unit a call graph is built, and if recursion is detected,
 
 Internal temporary variables (also static) are introduced to store intermediate results in calculating expressions. These variables are never stored on stack.
 
-These limitations with functions lead to another limitation: a function call result can only be assigned to a variable. You cannot use a function in an expression. Otherwise, each function would have to use its own set of temp variables. 
+These limitations with functions lead to another limitation: a function call result can only be assigned to a variable. You cannot use a function in an expression. Otherwise, each function would have to use its own set of temp variables.
 
 The other difference with C is the lack of static casts. In C narrow types are implicitly cast to `int`, then the operation result is cast back if assigned to a variable of a different type. In Natrix there are no implicit casts. Calculations are performed in the explicitly specified type. This helps to reduce unnecessary overhead and make it clear for the programmer which type is currenly used.
 
-The maze game is written in Natrix.
+
+# Applications
+
+These are the two applications I made for the computer.
+
+{{< youtube GdO9DErAI9A >}}
+
+The soft floating point calculator can perform four arithmetic operations. The numbers are coded by 16 bytes (14 bytes for 14 decimal digits of mantissa, 1 byte for the exponent and 1 sign byte). You can see how slow it divides two numbers.
+
+{{< youtube mjdh5GsGNQ4 >}}
+
+In the maze game you have a 1d view on a 2d maze and must find a key and then a door to the next, bigger, level. You look at one row of the maze at the time, but you can rotate your view. The game is written in Natrix.
 
 # Project repository
 
