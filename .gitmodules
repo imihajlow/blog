@@ -1,9 +1,3 @@
 [submodule "themes/hugo-bearblog"]
 	path = themes/hugo-bearblog
 	url = https://github.com/janraasch/hugo-bearblog.git
-[submodule "themes/VibrantShadows"]
-	path = themes/VibrantShadows
-	url = https://github.com/Softorage/HugoTheme-VibrantShadows.git
-[submodule "themes/Prav"]
-	path = themes/Prav
-	url = https://github.com/pravin/hugo-theme-prav.git
