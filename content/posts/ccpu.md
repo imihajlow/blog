@@ -1,7 +1,7 @@
 ---
 title: "Discrete logic IC CPU"
 date: 2020-10-11T18:53:35+02:00
-draft: true
+draft: false
 ---
 
 Since I was a kid I've always wanted to build my own computer. First I had only vague ideas of how computers are made, then I got myself a book about building an 8080-based computer and programming it, later, of course, I've got a lot of experience with various computers and microcontrollers, but I've never built one from scratch. Now, when I'm 30, I can say I have fulfilled my childhood dream.
